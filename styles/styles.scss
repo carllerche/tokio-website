@@ -79,6 +79,7 @@ $footer-background-color: black;
 $footer-color: white;
 
 @import "../node_modules/bulma/bulma.sass";
+@import "../node_modules/bulma-print/bulma-print";
 
 // Darken colors
 @function darken($color) {
@@ -527,6 +528,24 @@ a:active {
         height: $size;
       }
     }
+  }
+}
+
+@media print {
+  .columns {
+    display: block !important;
+    margin: 0 !important;
+  }
+  .tk-content,
+  .tk-markdown {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  .section {
+    padding: 0 !important;
+  }
+  body {
+    margin: revert !important;
   }
 }
 
