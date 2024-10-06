@@ -550,6 +550,7 @@ a:active {
   pre {
     white-space: pre-wrap !important;
     overflow-wrap: break-word !important;
+    break-inside: avoid !important;
   }
 }
 
