@@ -13,7 +13,7 @@ use bytes::Bytes;
 enum Frame {
     Simple(String),
     Error(String),
-    Integer(u64),
+    Integer(i64),
     Bulk(Bytes),
     Null,
     Array(Vec<Frame>),
