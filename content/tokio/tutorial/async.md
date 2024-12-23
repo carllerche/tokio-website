@@ -207,6 +207,12 @@ outer future, driving the asynchronous computation to completion.
 To better understand how this all fits together, let's implement our own minimal
 version of Tokio! The full code can be found [here][mini-tokio].
 
+Add the following dependency to your `Cargo.toml` to pull in `futures`.
+
+```toml
+futures = "0.3"
+```
+
 ```rust
 use std::collections::VecDeque;
 use std::future::Future;
@@ -499,7 +505,7 @@ implementors, but requires a bunch of unsafe boilerplate code. Instead of using
 provided by the [`futures`] crate. This allows us to implement a simple trait to
 expose our `Task` struct as a waker.
 
-Add the following dependency to your `Cargo.toml` to pull in `futures`.
+If you haven't already, add the following dependency to your `Cargo.toml` to pull in `futures`.
 
 ```toml
 futures = "0.3"
