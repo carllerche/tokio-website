@@ -12,6 +12,14 @@ $ mkdir -p examples
 $ mv src/main.rs examples/hello-redis.rs
 ```
 
+Then add following section to `Cargo.toml`
+
+```toml
+[[example]]
+name = "hello-redis"
+path = "examples/hello-redis.rs"
+```
+
 Then create a new, empty `src/main.rs` and continue.
 
 # Accepting sockets
