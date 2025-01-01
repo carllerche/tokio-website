@@ -78,9 +78,9 @@ The release also includes a ["current thread"][rt] version of the runtime
 but runs all components on the current thread. This allows running futures that
 do not implement `Send`.
 
-[fs]: https://docs.rs/tokio/0.1/tokio/fs/index.html
-[`file`]: https://docs.rs/tokio/0.1/tokio/fs/struct.File.html
-[in]: https://docs.rs/tokio/0.1/tokio/io/fn.stdin.html
-[out]: https://docs.rs/tokio/0.1/tokio/io/fn.stdout.html
-[`blocking`]: https://docs.rs/tokio-threadpool/0.1/tokio_threadpool/fn.blocking.html
-[rt]: https://docs.rs/tokio/0.1/tokio/runtime/current_thread/index.html
+[fs]: https://docs.rs/tokio/latest/tokio/fs/index.html
+[`file`]: https://docs.rs/tokio/latest/tokio/fs/struct.File.html
+[in]: https://docs.rs/tokio/latest/tokio/io/fn.stdin.html
+[out]: https://docs.rs/tokio/latest/tokio/io/fn.stdout.html
+[`blocking`]: https://docs.rs/tokio-threadpool/latest/tokio_threadpool/fn.blocking.html
+[rt]: https://docs.rs/tokio/latest/tokio/runtime/current_thread/index.html

@@ -29,7 +29,7 @@ review and improve the crate.
 Thanks goes to: [@dekellum], [@matsadler], [@debris], [@mati865], [@lovebug356],
 [@bryanburgers], [@shepmaster].
 
-[fs]: https://docs.rs/tokio/0.1.8/tokio/fs/index.html
+[fs]: https://docs.rs/tokio/latest/tokio/fs/index.html
 [pr]: https://github.com/tokio-rs/tokio/pull/494
 
 ## Concurrency improvements
