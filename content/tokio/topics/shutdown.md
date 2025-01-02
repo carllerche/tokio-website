@@ -87,7 +87,7 @@ Here are the steps to use `CancellationToken` in multiple tasks:
 3. Pass the original or cloned token to the tasks that should respond to cancellation requests.
 4. When you want to shut down the tasks gracefully, call the `cancel` method on the original or cloned token. Any task listening to the cancellation request on the original or cloned token will be notified to shut down.
 
-Here is code snippet showcasing the above mentioned steps:
+Here is a code snippet showcasing the above mentioned steps:
 
 ```rs
 // Step 1: Create a new CancellationToken
