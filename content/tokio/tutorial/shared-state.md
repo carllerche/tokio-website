@@ -205,28 +205,17 @@ async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
         *lock += 1;
     } // lock goes out of scope here
 
-    do_something_async().await;
-}
-# async fn do_something_async() {}
-```
-Note that this does not work:
-```rust
-use std::sync::{Mutex, MutexGuard};
-
-// This fails too.
-async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
-    let mut lock: MutexGuard<i32> = mutex.lock().unwrap();
-    *lock += 1;
-    drop(lock);
+    // Alternatively, you can use drop(lock) to explicitly drop the lock.
+    // This does not require a nested scope.
+    //
+    // let mut lock: MutexGuard<i32> = mutex.lock().unwrap();
+    // *lock += 1;
+    // drop(lock); // lock goes out of scope here
 
     do_something_async().await;
 }
 # async fn do_something_async() {}
 ```
-This is because the compiler currently calculates whether a future is `Send`
-based on scope information only. The compiler will hopefully be updated to
-support explicitly dropping it in the future, but for now, you must explicitly
-use a scope.
 
 Note that the error discussed here is also discussed in the [Send bound section
 from the spawning chapter][send-bound].
