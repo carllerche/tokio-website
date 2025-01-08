@@ -12,9 +12,8 @@ performance issues during the development process.
 For instance, to use tokio-console in [the mini-redis project](https://github.com/tokio-rs/mini-redis),
 you need to enable the `tracing` feature for the Tokio package:
 
-```toml
-# Update the tokio import in your Cargo.toml
-tokio = { version = "1", features = ["full", "tracing"] }
+```bash
+cargo add tokio --features full,tracing
 ```
 
 Note: The `full` feature doesn't enable `tracing`.
@@ -23,9 +22,8 @@ You'll also need to add a dependency on the `console-subscriber` package. This
 crate provides a `Subscriber` implementation that will replace the one currently
 used by mini-redis:
 
-```toml
-# Add this to the dependencies section of your Cargo.toml
-console-subscriber = "0.1.5"
+```bash
+cargo add console-subscriber
 ```
 
 Finally, in `src/bin/server.rs`, replace the call to `tracing_subscriber` with
@@ -128,16 +126,16 @@ It will look like this:
 
 We'll come back to this page once we have some trace data generated and sent.
 
-To set up mini-redis, we'll first need to add a few dependencies. Update your
-`Cargo.toml` with the following:
+To set up mini-redis, we'll first need to add a few dependencies. Add the
+following dependencies to your `Cargo.toml` file:
 
-```toml
+```bash
 # Implements the types defined in the Otel spec
-opentelemetry = "0.17.0"
+cargo add opentelemetry
 # Integration between the tracing crate and the opentelemetry crate
-tracing-opentelemetry = "0.17.2" 
+cargo add tracing-opentelemetry
 # Allows you to export data to Jaeger
-opentelemetry-jaeger = "0.16.0"
+cargo add opentelemetry-jaeger
 ```
 
 Now, in `src/bin/server.rs`, add the following imports:

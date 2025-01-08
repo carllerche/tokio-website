@@ -13,17 +13,17 @@ then read back the key. This will be done using the Mini-Redis client library.
 Let's start by generating a new Rust app:
 
 ```bash
-$ cargo new my-redis
-$ cd my-redis
+cargo new my-redis
+cd my-redis
 ```
 
 ## Add dependencies
 
-Next, open `Cargo.toml` and add the following right below `[dependencies]`:
+Add the following dependencies to your `Cargo.toml` file:
 
-```toml
-tokio = { version = "1", features = ["full"] }
-mini-redis = "0.4"
+```bash
+cargo add tokio --features full
+cargo add mini-redis
 ```
 
 ## Write the code
@@ -55,13 +55,13 @@ async fn main() -> Result<()> {
 Make sure the Mini-Redis server is running. In a separate terminal window, run:
 
 ```bash
-$ mini-redis-server
+mini-redis-server
 ```
 
 If you have not already installed mini-redis, you can do so with
 
 ```bash
-$ cargo install mini-redis
+cargo install mini-redis
 ```
 
 Now, run the `my-redis` application:

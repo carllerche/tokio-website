@@ -30,11 +30,10 @@ the underlying data. Instead, a `Bytes` instance is a reference-counted handle
 to some underlying data. The `Bytes` type is roughly an `Arc<Vec<u8>>` but with
 some added capabilities.
 
-To depend on `bytes`, add the following to your `Cargo.toml` in the
-`[dependencies]` section:
+Add the `bytes` dependency to your `Cargo.toml` file:
 
-```toml
-bytes = "1"
+```bash
+cargo add bytes
 ```
 
 [`bytes`]: https://docs.rs/bytes/1/bytes/struct.Bytes.html
@@ -154,6 +153,7 @@ async fn process(socket: TcpStream, db: Db) {
 # Holding a `MutexGuard` across an `.await`
 
 You might write code that looks like this:
+
 ```rust
 use std::sync::{Mutex, MutexGuard};
 
@@ -165,8 +165,10 @@ async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
 } // lock goes out of scope here
 # async fn do_something_async() {}
 ```
+
 When you try to spawn something that calls this function, you will encounter the
 following error message:
+
 ```text
 error: future cannot be sent between threads safely
    --> src/lib.rs:13:5
@@ -191,11 +193,13 @@ note: future is not `Send` as this value is used across an await
 8   | }
     | - `mut lock` is later dropped here
 ```
+
 This happens because the `std::sync::MutexGuard` type is **not** `Send`. This
 means that you can't send a mutex lock to another thread, and the error happens
 because the Tokio runtime can move a task between threads at every `.await`.
 To avoid this, you should restructure your code such that the mutex lock's
 destructor runs before the `.await`.
+
 ```rust
 # use std::sync::{Mutex, MutexGuard};
 // This works!
@@ -209,7 +213,9 @@ async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
 }
 # async fn do_something_async() {}
 ```
+
 Note that this does not work:
+
 ```rust
 use std::sync::{Mutex, MutexGuard};
 
@@ -223,6 +229,7 @@ async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
 }
 # async fn do_something_async() {}
 ```
+
 This is because the compiler currently calculates whether a future is `Send`
 based on scope information only. The compiler will hopefully be updated to
 support explicitly dropping it in the future, but for now, you must explicitly
@@ -250,6 +257,7 @@ We will discuss some approaches to avoid these issues below:
 
 The safest way to handle a mutex is to wrap it in a struct, and lock the mutex
 only inside non-async methods on that struct.
+
 ```rust
 use std::sync::Mutex;
 
@@ -270,6 +278,7 @@ async fn increment_and_do_stuff(can_incr: &CanIncrement) {
 }
 # async fn do_something_async() {}
 ```
+
 This pattern guarantees that you won't run into the `Send` error, because the
 mutex guard does not appear anywhere in an async function. It also protects you
 from deadlocks, when using crates whose `MutexGuard` implements `Send`.
@@ -288,6 +297,7 @@ The [`tokio::sync::Mutex`] type provided by Tokio can also be used. The primary
 feature of the Tokio mutex is that it can be held across an `.await` without any
 issues. That said, an asynchronous mutex is more expensive than an ordinary
 mutex, and it is typically better to use one of the two other approaches.
+
 ```rust
 use tokio::sync::Mutex; // note! This uses the Tokio mutex
 

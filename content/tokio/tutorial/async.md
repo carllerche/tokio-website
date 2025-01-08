@@ -499,10 +499,10 @@ implementors, but requires a bunch of unsafe boilerplate code. Instead of using
 provided by the [`futures`] crate. This allows us to implement a simple trait to
 expose our `Task` struct as a waker.
 
-Add the following dependency to your `Cargo.toml` to pull in `futures`.
+Add the `futures` dependency to your `Cargo.toml` file:
 
-```toml
-futures = "0.3"
+```bash
+cargo add futures
 ```
 
 Then implement [`futures::task::ArcWake`][`ArcWake`].
