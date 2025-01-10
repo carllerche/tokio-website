@@ -13,18 +13,35 @@ then read back the key. This will be done using the Mini-Redis client library.
 Let's start by generating a new Rust app:
 
 ```bash
-$ cargo new my-redis
-$ cd my-redis
+cargo new my-redis
+cd my-redis
 ```
 
 ## Add dependencies
 
-Next, open `Cargo.toml` and add the following right below `[dependencies]`:
+Next, add [tokio] and [mini-redis] to the `[dependencies]` section in the
+`Cargo.toml` manifest:
+
+[tokio]: https://crates.io/crates/tokio
+[mini-redis]: https://crates.io/crates/mini-redis
+
+```bash
+cargo add tokio --features full
+cargo add mini-redis
+```
+
+This will result in something similar to the following (the versions may be
+later than this):
 
 ```toml
-tokio = { version = "1", features = ["full"] }
-mini-redis = "0.4"
+[dependencies]
+tokio = { version = "1.41.1", features = ["full"] }
+mini-redis = "0.4.1"
 ```
+
+We use the `full` feature flag for simplicity. For more
+information about the available feature flags see the [feature flags
+topic](/tokio/topics/feature-flags).
 
 ## Write the code
 
@@ -45,23 +62,25 @@ async fn main() -> Result<()> {
     // Get key "hello"
     let result = client.get("hello").await?;
 
-    println!("got value from the server; result={:?}", result);
+    println!("got value from the server; result={result:?}");
 
     Ok(())
 }
 # }
 ```
 
+## Run the code
+
 Make sure the Mini-Redis server is running. In a separate terminal window, run:
 
 ```bash
-$ mini-redis-server
+mini-redis-server
 ```
 
 If you have not already installed mini-redis, you can do so with
 
 ```bash
-$ cargo install mini-redis
+cargo install mini-redis
 ```
 
 Now, run the `my-redis` application:
@@ -77,10 +96,54 @@ You can find the full code [here][full].
 
 [full]: https://github.com/tokio-rs/website/blob/master/tutorial-code/hello-tokio/src/main.rs
 
+# Troubleshooting
+
+A common mistake is to forget to add `.await` on calls to asynchronous
+functions. This is particularly easy to forget for functions where the return
+value is not used by the application. The compiler warns you and teaches you how
+to fix this error.
+
+```plain
+warning: unused implementer of `std::future::Future` that must be used
+  --> examples/hello-redis.rs:12:5
+   |
+12 |     client.set("hello", "world".into());
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: futures do nothing unless you `.await` or poll them
+   = note: `#[warn(unused_must_use)]` on by default
+```
+
 # Breaking it down
 
 Let's take some time to go over what we just did. There isn't much code, but a
 lot is happening.
+
+## Async `main` function
+
+```rust
+# use mini_redis::{Result};
+#[tokio::main]
+async fn main() -> Result<()> {
+    // ...
+
+    Ok(())
+}
+```
+
+The main function is an asynchronous function. This is indicated by the `async`
+keyword before the function definition. It returns `mini_redis::Result`. The
+`Ok(())` value indicates that the program completed successfully. The
+`#[tokio::main]` macro, wraps the asynchronous function in a standard
+synchronous function and runs the asynchronous code on the tokio runtime.
+
+For more information on this see the [Async `main` function] section of the
+[Asynchronous Programming] topic.
+
+[Async `main` function]: /tokio/topics/async#async-main-function
+[Asynchronous Programming]: /tokio/topics/async
+
+## Connecting to redis
 
 ```rust
 # use mini_redis::client;
@@ -94,155 +157,58 @@ The [`client::connect`] function is provided by the `mini-redis` crate. It
 asynchronously establishes a TCP connection with the specified remote address.
 Once the connection is established, a `client` handle is returned. Even though
 the operation is performed asynchronously, the code we write **looks**
-synchronous. The only indication that the operation is asynchronous is the
-`.await` operator.
+synchronous. To actually run the connect operation, on the runtime, you need to
+add the `await` keyword.
 
-[`client::connect`]: https://docs.rs/mini-redis/0.4/mini_redis/client/fn.connect.html
+We use the `?` operator on this call as the method may fail if the underlying
+connection cannot be established (e.g. if the server is not running).
 
-## What is asynchronous programming?
+[`client::connect`]: https://docs.rs/mini-redis/latest/mini_redis/client/fn.connect.html
 
-Most computer programs are executed in the same order in which they are written.
-The first line executes, then the next, and so on.  With synchronous programming,
-when a program encounters an operation that cannot be completed immediately, it
-will block until the operation completes. For example, establishing a TCP
-connection requires an exchange with a peer over the network, which can take a
-sizeable amount of time. During this time, the thread is blocked.
+## Setting and getting a key
 
-With asynchronous programming, operations that cannot complete immediately are
-suspended to the background. The thread is not blocked, and can continue running
-other things. Once the operation completes, the task is unsuspended and continues
-processing from where it left off. Our example from before only has one task, so
-nothing happens while it is suspended, but asynchronous programs typically have
-many such tasks.
+To set a key, we use the [`Client::set`] method, passing the key and value. This
+method is asynchronous, so we use `await`.
 
-Although asynchronous programming can result in faster applications, it often
-results in much more complicated programs. The programmer is required to track
-all the state necessary to resume work once the asynchronous operation
-completes. Historically, this is a tedious and error-prone task.
-
-## Compile-time green-threading
-
-Rust implements asynchronous programming using a feature called [`async/await`].
-Functions that perform asynchronous operations are labeled with the `async`
-keyword. In our example, the `connect` function is defined like this:
+[`Client::set`]: https://docs.rs/mini-redis/latest/mini_redis/client/struct.Client.html#method.set
 
 ```rust
-use mini_redis::Result;
-use mini_redis::client::Client;
-use tokio::net::ToSocketAddrs;
-
-pub async fn connect<T: ToSocketAddrs>(addr: T) -> Result<Client> {
-    // ...
-# unimplemented!()
-}
+# use mini_redis::client;
+# async fn dox() -> mini_redis::Result<()> {
+# let mut client = client::connect("127.0.0.1:6379").await?;
+client.set("hello", "world".into()).await?;
+# Ok(())
+# }
 ```
 
-The `async fn` definition looks like a regular synchronous function, but
-operates asynchronously. Rust transforms the `async fn` at **compile** time into
-a routine that operates asynchronously. Any calls to `.await` within the `async
-fn` yield control back to the thread. The thread may do other work while the
-operation processes in the background.
+To get the value of a key, we use the [`Client::get`] method, which also requires `await`.
 
-> **warning**
-> Although other languages implement [`async/await`] too, Rust takes a unique
-> approach. Primarily, Rust's async operations are **lazy**. This results in
-> different runtime semantics than other languages.
-
-[`async/await`]: https://en.wikipedia.org/wiki/Async/await
-
-If this doesn't quite make sense yet, don't worry. We will explore `async/await`
-more throughout the guide.
-
-## Using `async/await`
-
-Async functions are called like any other Rust function. However, calling these
-functions does not result in the function body executing. Instead, calling an
-`async fn` returns a value representing the operation. This is conceptually
-analogous to a zero-argument closure. To actually run the operation, you should
-use the `.await` operator on the return value.
-
-For example, the given program
+[`Client::get`]: https://docs.rs/mini-redis/latest/mini_redis/client/struct.Client.html#method.get
 
 ```rust
-async fn say_world() {
-    println!("world");
-}
-
-#[tokio::main]
-async fn main() {
-    // Calling `say_world()` does not execute the body of `say_world()`.
-    let op = say_world();
-
-    // This println! comes first
-    println!("hello");
-
-    // Calling `.await` on `op` starts executing `say_world`.
-    op.await;
-}
+# use mini_redis::client;
+# async fn dox() -> mini_redis::Result<()> {
+# let mut client = client::connect("127.0.0.1:6379").await?;
+let result = client.get("hello").await?;
+# Ok(())
+# }
 ```
 
-outputs:
+The result is an `Option<Bytes>`, which will be `Some(Bytes)` if the key exists
+or `None` if it does not. We print the Debug format of the result.
 
-```text
-hello
-world
+```rust,ignore
+# let result = 42;
+println!("got value from the server; result={result:?}");
 ```
 
-The return value of an `async fn` is an anonymous type that implements the
-[`Future`] trait.
+# Conclusion
 
-[`Future`]: https://doc.rust-lang.org/std/future/trait.Future.html
+Congratulations on writing your first Tokio application! In the next section,
+we will explore Tokio's asynchronous programming model in more detail.
 
-## Async `main` function
+If you have any questions, feel free to ask on the [Tokio Discord server] or
+[GitHub Discussions].
 
-The main function used to launch the application differs from the usual one
-found in most of Rust's crates.
-
-1. It is an `async fn`
-2. It is annotated with `#[tokio::main]`
-
-An `async fn` is used as we want to enter an asynchronous context. However,
-asynchronous functions must be executed by a [runtime]. The runtime contains the
-asynchronous task scheduler, provides evented I/O, timers, etc. The runtime does
-not automatically start, so the main function needs to start it.
-
-The `#[tokio::main]` function is a macro. It transforms the `async fn main()`
-into a synchronous `fn main()` that initializes a runtime instance and executes
-the async main function.
-
-For example, the following:
-
-```rust
-#[tokio::main]
-async fn main() {
-    println!("hello");
-}
-```
-
-gets transformed into:
-
-```rust
-fn main() {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    rt.block_on(async {
-        println!("hello");
-    })
-}
-```
-
-The details of the Tokio runtime will be covered later.
-
-[runtime]: https://docs.rs/tokio/1/tokio/runtime/index.html
-
-## Cargo features
-
-When depending on Tokio for this tutorial, the `full` feature flag is enabled:
-
-```toml
-tokio = { version = "1", features = ["full"] }
-```
-
-Tokio has a lot of functionality (TCP, UDP, Unix sockets, timers, sync
-utilities, multiple scheduler types, etc). Not all applications need all
-functionality. When attempting to optimize compile time or the end application
-footprint, the application can decide to opt into **only** the features it uses.
+[Tokio Discord server]: https://discord.gg/tokio
+[GitHub Discussions]: https://github.com/tokio-rs/tokio/discussions

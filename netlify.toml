@@ -29,6 +29,11 @@ NETLIFY_NEXT_PLUGIN_SKIP = "true"
 from = "/docs/overview"
 to = "/tokio/tutorial"
 
+# Previous setup steps were moved to the main tutorial page
+[[redirects]]
+from = "/tokio/tutorial/setup"
+to = "/tokio/tutorial"
+
 # Redirect previous rss feed location
 [[redirects]]
 from = "/_next/static/feed.xml"

@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 
-const gettingStarted = "/tokio/tutorial";
+const gettingStarted = "/tokio/introduction";
 
 const icons = [
   "bytes",
