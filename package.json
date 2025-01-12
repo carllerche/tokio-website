@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "bulma": "^0.8.2",
+    "bulma-print": "^1.0.1",
     "classnames": "2.5.1",
     "glob": "11.0.0",
     "gray-matter": "^4.0.3",

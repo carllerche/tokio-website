@@ -39,7 +39,7 @@ const Navigation: FC<{ blog: Blog }> = ({ blog }) => {
 
   return (
     <nav
-      className="navbar is-spaced"
+      className="navbar is-spaced is-hidden-print"
       role="navigation"
       aria-label="main navigation"
     >
