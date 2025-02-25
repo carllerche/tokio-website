@@ -6,7 +6,7 @@ import Link from "next/link";
 function Footer({ next, prev, mdPath }) {
   let edit = `https://github.com/tokio-rs/website/edit/master/content/${mdPath}`;
   return (
-    <div className="tk-doc-footer">
+    <div className="tk-doc-footer is-hidden-print">
       <div className="level">
         <div className="level-left">
           <div className="level-item tk-prev">
@@ -98,7 +98,7 @@ function TableOfContents({ headings }) {
   }, [headings]);
 
   return (
-    <aside className="column is-one-third tk-content-summary">
+    <aside className="column is-one-third tk-content-summary is-hidden-print">
       <ul className="tk-content-summary-menu">{list}</ul>
     </aside>
   );
@@ -134,7 +134,7 @@ export default function Content({
   return (
     <>
       <div className="columns is-marginless tk-docs">
-        <div className="column is-one-quarter tk-docs-nav">
+        <div className="column is-one-quarter tk-docs-nav is-hidden-print">
           <Menu href={href} menu={menu}>
             {isBlogRoute && (
               <div className="all-posts-link">
