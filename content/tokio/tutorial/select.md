@@ -644,14 +644,10 @@ The logic we want to implement is:
 
 ```rust
 async fn action(input: Option<i32>) -> Option<String> {
-    // If the input is `None`, return `None`.
-    // This could also be written as `let i = input?;`
-    let i = match input {
-        Some(input) => input,
-        None => return None,
-    };
-    // async logic here
-#   Some(i.to_string())
+    input.map(|i| {
+        // async logic here
+#       i.to_string()
+    })
 }
 
 #[tokio::main]
