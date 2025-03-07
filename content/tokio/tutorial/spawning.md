@@ -374,7 +374,7 @@ async fn process(socket: TcpStream) {
     use std::collections::HashMap;
 
     // A hashmap is used to store data
-    let mut db = HashMap::new();
+    let mut db = HashMap::<String, Vec<u8>>::new();
 
     // Connection, provided by `mini-redis`, handles parsing frames from
     // the socket
